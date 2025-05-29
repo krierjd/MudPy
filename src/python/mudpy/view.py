@@ -287,7 +287,7 @@ def quick_static(gflist,datapath,scale=1):
     plt.show()
 
 
-def slip3D(rupt,marker_size=60,clims=None,plot_onset=False,cmap=whitejet):
+def slip3D(rupt,marker_size=60,clims=None,plot_onset=False,cmap=whitejet,show=False):
     '''
     For complex fault geometries make a quick 3D plot of the rupture model
     
@@ -352,7 +352,8 @@ def slip3D(rupt,marker_size=60,clims=None,plot_onset=False,cmap=whitejet):
         cb.set_label('Onset time (s)')
     plt.subplots_adjust(left=0.1, bottom=0.1, right=1.0, top=0.9, wspace=0, hspace=0)
     plt.title(rupt)
-    plt.show()
+    if show:
+        plt.show()
 
 
 
@@ -1727,7 +1728,8 @@ def plot_data(home,project_name,gflist,vord,decimate,lowpass,t_lim,sort,scale,k_
     
 def synthetics(home,project_name,run_name,run_number,gflist,vord,decimate,lowpass,t_lim,
                sort,scale,k_or_g,uncert=False,waveforms_as_accel=False,units='m',uncerth=0.01,uncertv=0.03,
-               tick_frequency=10,spoof_vel_as_disp=False,return_vectors=False):
+               tick_frequency=10,spoof_vel_as_disp=False,return_vectors=False,same_channel_amplitude=True,
+               show=False):
     '''
     Plot synthetics vs real data
     
@@ -1855,6 +1857,15 @@ def synthetics(home,project_name,run_name,run_number,gflist,vord,decimate,lowpas
         axe.yaxis.set_ticks([])
         axu.yaxis.set_ticks([])
         
+        if same_channel_amplitude == True:
+            ymax = max(abs(n[0].data.max()), abs(ns[0].data.max()), 
+                       abs(e[0].data.max()), abs(es[0].data.max()), 
+                       abs(u[0].data.max()), abs(us[0].data.max()))
+            ymin = -ymax
+            axn.set_ylim([ymin,ymax])
+            axe.set_ylim([ymin,ymax])
+            axu.set_ylim([ymin,ymax])
+
         #Annotations
         trange=t_lim[1]-t_lim[0]
         sign=1.
@@ -1975,7 +1986,8 @@ def synthetics(home,project_name,run_name,run_number,gflist,vord,decimate,lowpas
             #axu.xaxis.set_ticks(xtick)
     #plt.subplots_adjust(left=0.2, bottom=0.05, right=0.8, top=0.95, wspace=0, hspace=0)
     plt.subplots_adjust(left=0.2, bottom=0.15, right=0.8, top=0.85, wspace=0, hspace=0)
-    plt.show()
+    if show:
+        plt.show()
     
     if return_vectors == True:
         
@@ -2093,7 +2105,8 @@ def insar_residual(home,project_name,run_name,run_number,gflist,zlims):
     plt.grid()
     
     
-def insar_results(home,project_name,run_name,run_number,gflist,zlims,cmap,figsize=(8,5),title=None,interpolate=True,method='linear',npts=100):
+def insar_results(home,project_name,run_name,run_number,gflist,zlims,cmap,figsize=(8,5),title=None,interpolate=True,method='linear',npts=100,
+                  show=False):
     '''
     Plot insar observed in one panel and insar modeled in the other
     
@@ -2179,6 +2192,9 @@ def insar_results(home,project_name,run_name,run_number,gflist,zlims,cmap,figsiz
         plt.xlabel('Longitude')
         plt.grid()
         plt.suptitle(title)
+
+    if show:
+        plt.show()
     
 def tsunami_synthetics(home,project_name,run_name,run_number,gflist,t_lim,sort,scale):
     '''

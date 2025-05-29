@@ -794,6 +794,19 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
     # G[:,ids_zone] = 0
     
 
+    #Zero out subfaults south of someplace (18.5 for Myanmar)
+    # print(' DANGER WILL ROBINSON: Forcing faults south of 18.5N to have GFs = 0')
+    # fault_geometry = genfromtxt('/Users/dmelgarm/Slip_inv/Myanmar_joint_hires/output/inverse_models/models/SM_SA_SD.0008.inv')
+    # izone = where(fault_geometry[:,2]<18.5)[0]
+
+    # #Double indices because of ss and ds coordiante system
+    # iss_zone = 2*izone
+    # ids_zone = 2*izone + 1
+
+    # #Zero out those GFs
+    # G[:,iss_zone] = 0
+    # G[:,ids_zone] = 0
+
     
     #######    END POLY FILTER STUFF
     

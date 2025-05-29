@@ -3035,12 +3035,26 @@ def ssds2rake(ss,ds):
     return rake
     
 def makefault(fout,strike,dip,nstrike,dx_dip,dx_strike,epicenter,num_updip,num_downdip,rise_time):
-    '''
-    Make a planar fault
+    """
+    Create a planar fault and write its properties to a file.
     
-    strike - Strike angle (degs)
-    dip - Dip angle (degs)200/5
-    '''
+    Parameters:
+    
+    fout (str): Output file path to save the fault properties.
+    strike (float): Strike angle in degrees.
+    dip (float): Dip angle in degrees.
+    nstrike (int): Number of subfaults along the strike direction.
+    dx_dip (float): Distance between subfaults along the dip direction.
+    dx_strike (float): Distance between subfaults along the strike direction.
+    epicenter (tuple): Coordinates of the epicenter (longitude, latitude, depth).
+    num_updip (int): Number of subfaults updip from the epicenter.
+    num_downdip (int): Number of subfaults downdip from the epicenter.
+    rise_time (float): Rise time for the fault slip.
+    
+    Returns:
+    None
+    """
+
     from numpy import arange,sin,cos,deg2rad,r_,ones,arctan,rad2deg,zeros,isnan,unique,where,argsort
     import pyproj
     
@@ -3128,6 +3142,11 @@ def makefault(fout,strike,dip,nstrike,dx_dip,dx_strike,epicenter,num_updip,num_d
     L=ones(loout.shape)*dx_strike*1000
     W=ones(loout.shape)*dx_dip*1000
     f=open(fout,'w')
+    # Write header line
+    header = "# No\tLongitude\tLatitude\tDepth(km)\tStrike\tDip\ttype\tRise Time\tLength(m)\tWidth(m)\n"
+    print('Hi')
+    f.write(header)
+    
     for k in range(len(x)):   
         out='%i\t%.6f\t%.6f\t%.3f\t%.2f\t%.2f\t%.1f\t%.1f\t%.2f\t%.2f\n' % (k+1,loout[k],laout[k],zout[k],strike[k],dip[k],tw[k],rise[k],L[k],W[k])
         f.write(out)
