@@ -700,12 +700,10 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
     G=inv.getG(home,project_name,fault_name,model_name,GF_list,G_from_file,G_name,epicenter,
                 rupture_speed,num_windows,decimate,bandpass,onset_file=onset_file)
     
-    
-    
     # Force faults inside a polygon to be zero (not contribute to inversion, 
     # useful for testing sensitivites)
     # print(' DANGER WILL ROBINSON: Forcing faults in polygon to have GFs = 0')
-    
+
     # print('Keep Zone 1, 2 and 3')
     # p = genfromtxt('/Users/dmelgarm/Coalcoman2022/kml/zone1.txt')
     # zone_poly1 = path.Path(p)
@@ -855,7 +853,7 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
             Ls=inv.getLs(home,project_name,fault_name,nfaults,num_windows,bounds)
         elif Ltype==0: #Tikhonov smoothing
             N=nfaults[0]*nfaults[1]*num_windows*2 #Get total no. of model parameters
-            Ls=eye(N) 
+            Ls=eye(N)
         elif Ltype==3:  #moment regularization
             N=nfaults[0]*nfaults[1]*num_windows*2 #Get total no. of model parameters
             Ls=ones((1,N))

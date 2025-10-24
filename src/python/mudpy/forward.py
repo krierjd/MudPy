@@ -2516,7 +2516,7 @@ def get_mu_and_area(home,project_name,fault_name,model_name):
     return mu,area
     
 
-def get_source_time_function(mu,area,rise_time,t0,slip):
+def get_source_time_function(mu,area,rise_time,t0,slip,single_force=0):
     '''
     Compute source time function for a given rise time, right now it assumes 1m of slip
     and a triangle STF
@@ -2528,7 +2528,10 @@ def get_source_time_function(mu,area,rise_time,t0,slip):
     t=linspace(t0,t0+rise_time,1000)
     Mdot=zeros(t.shape)
     #Triangle gradient
-    m=4*mu*area/(rise_time**2)
+    if single_force == 1:
+        m = 4/(rise_time**2)
+    else:
+        m=4*mu*area/(rise_time**2)
     #Upwards intercept
     b1=-m*t0
     #Downwards intercept
