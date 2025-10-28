@@ -250,7 +250,8 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
         
         if single_force==True:
             #Force of a square meter from a landslide in Dyne Allstadt 2013 on Mt. Meager in dyne
-            Mag=6e11
+            Mag=1e16
+
         else:
             #Get moment corresponding to 1 meter of slip on subfault
             mu=get_mu(structure,zs)
@@ -656,8 +657,12 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                         
                         
                         #Now define the scalng based on magnitude this is variable
-                        #"coef" in the syn.c original source code
-                        scale = 10**(1.5*Mw+16.1-20) #definition used in syn.c
+                        #"coef" in the syn.c original source code ############JUSTIN EDITS############
+                        if single_force==True:
+                            scale = Mag*1e-15 #definition used in syn.c line 139
+                        ############## END OF EDITS ###################
+                        else:
+                            scale = 10**(1.5*Mw+16.1-20) #definition used in syn.c
                         
                         #Scale radiation patterns accordingly
                         radiation_pattern_ss *= scale

@@ -242,9 +242,6 @@ def getG(home,project_name,fault_name,model_name,GF_list,G_from_file,G_name,epic
                     Ginsar_nwin=c_[Ginsar_nwin,Ginsar]
                 Ginsar=Ginsar_nwin.copy()
                 Ginsar_nwin=None #Release memory
-            print(Gstatic.shape)
-            print(Gvel.shape)
-            print(Ginsar.shape)
             G=concatenate([g for g in [Gstatic,Gdisp,Gvel,Gtsun,Ginsar] if g.size > 0])
         print('Saving GF matrix to '+G_name+' this might take just a second...')
         save(G_name,G)
@@ -768,7 +765,6 @@ def getdata(home,project_name,GF_list,decimate,bandpass,quiet=False):
     for ksta in range(len(i)):
         if quiet==False:  
             print('Assembling acceleration waveforms from '+stations[i[ksta]]+' into data vector.')
-            print(GFfiles[i[ksta]],kgf)
         n=read(GFfiles[i[ksta],kgf]+'.n')
         e=read(GFfiles[i[ksta],kgf]+'.e')
         u=read(GFfiles[i[ksta],kgf]+'.u')
