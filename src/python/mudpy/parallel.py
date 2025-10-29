@@ -1319,6 +1319,7 @@ if __name__ == '__main__':
         elif single_force=='False':
             single_force=False
         run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax,tsunami,insar,rank,size,single_force)
+
     
     elif sys.argv[1]=='run_parallel_synthetics':
         #Parse command line arguments

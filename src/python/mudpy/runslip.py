@@ -502,7 +502,8 @@ def inversionGFs(home,project_name,GF_list,tgf_file,fault_name,model_name,
             print('InSAR GFs requested...')
             f=open(home+project_name+'/data/station_info/'+station_file,'w')
             for k in range(len(i)): #Write temp .sta file
-                out=stations[i[k]]+'\t'+repr(GF[i[k],0])+'\t'+repr(GF[i[k],1])+'\n'
+                #out=stations[i[k]]+'\t'+repr(GF[i[k],0])+'\t'+repr(GF[i[k],1])+'\n'
+                out='%s\t%.8f\t%.8f\n' % (stations[i[k]],GF[i[k],0],GF[i[k],1])
                 f.write(out)
             f.close()
             static=1
@@ -590,7 +591,8 @@ def inversionGFs(home,project_name,GF_list,tgf_file,fault_name,model_name,
             #Make dummy station file
             f=open(home+project_name+'/data/station_info/'+station_file,'w')
             for k in range(len(i)):
-                out=stations[i[k]]+'\t'+repr(GF[i[k],0])+'\t'+repr(GF[i[k],1])+'\n'
+                #out=stations[i[k]]+'\t'+repr(GF[i[k],0])+'\t'+repr(GF[i[k],1])+'\n'
+                out='%s\t%.8f\t%.8f\n' % (stations[i[k]],GF[i[k],0],GF[i[k],1])
                 f.write(out)
             f.close()
             integrate=0
@@ -797,6 +799,19 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
     # G[:,iss_zone] = 0
     # G[:,ids_zone] = 0
     
+
+    #Zero out subfaults south of someplace (18.5 for Myanmar)
+    # print(' DANGER WILL ROBINSON: Forcing faults south of 18.5N to have GFs = 0')
+    # fault_geometry = genfromtxt('/Users/dmelgarm/Slip_inv/Myanmar_joint_hires/output/inverse_models/models/SM_SA_SD.0008.inv')
+    # izone = where(fault_geometry[:,2]<18.5)[0]
+
+    # #Double indices because of ss and ds coordiante system
+    # iss_zone = 2*izone
+    # ids_zone = 2*izone + 1
+
+    # #Zero out those GFs
+    # G[:,iss_zone] = 0
+    # G[:,ids_zone] = 0
 
     
     #######    END POLY FILTER STUFF
