@@ -100,6 +100,7 @@ def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,
                     newf=subfault_folder+'/'+f.split('/')[-1]
                     copy(f,newf)
                 rmtree(subfault_folder+'/'+model_name+'_'+depth)
+            print(command)
         else: #Compute only statics
             if insar==True:
                 suffix='insar'
@@ -324,6 +325,7 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                             commandDS="syn -I -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeDS)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.disp.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
+                    print(commandSS)
                 else: #Make vel.
                     #First Stike-Slip GFs
                     if custom_stf==None:
@@ -597,7 +599,7 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                         r_dd = u_dd.copy()
                         r_ds = u_ds.copy()
                         r_ss = u_ss.copy()
-                        
+                        10.1785/BSSA0830010130
                         #terms for t component
                         t_dd = zeros(Nsites)
                         t_ds = cstk*srak*cdip2+sstk*crak*cdip
