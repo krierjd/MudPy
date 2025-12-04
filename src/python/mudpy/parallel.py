@@ -3,7 +3,7 @@ Module for routines that use paralell computing
 '''
 
 
-def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax,tsunami,insar,rank,size,single_force):
+def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax,tsunami,insar,rank,size,single_force,tb=50):
     '''
     Compute GFs using Zhu & Rivera code for a given velocity model, source depth
     and station file. This function will make an external system call to fk.pl
@@ -45,7 +45,8 @@ def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,
         kmax = %.3f
         insar = %s
         single = %s
-        ''' %(home,project_name,station_file,model_name,str(static),str(tsunami),dt,NFFT,dk,pmin,pmax,kmax,str(insar),str(single_force))
+        tb = %s
+        ''' %(home,project_name,station_file,model_name,str(static),str(tsunami),dt,NFFT,dk,pmin,pmax,kmax,str(insar),str(single_force),str(tb))
         print(out)
     #read your corresponding source file
     source=genfromtxt(home+project_name+'/data/model_info/mpi_source.'+str(rank)+'.fault')
@@ -79,7 +80,7 @@ def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,
         #Make the calculation
         if static==0: #Compute full waveform
             if single_force==1: #compute for a single force and not coupled
-                command = "fk.pl -M"+model_name+"/"+depth+"/f -S1 -N"+str(NFFT)+"/"+str(dt)+'/1/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr
+                command = "fk.pl -M"+model_name+"/"+depth+"/f -S1 -T"+str(tb)+" -G15 -N"+str(NFFT)+"/"+str(dt)+'/8/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr
                 command=split(command)
                 p=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 p.communicate() 
@@ -90,7 +91,7 @@ def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,
                     copy(f,newf)
                 rmtree(subfault_folder+'/'+model_name+'_'+depth)
             else:
-                command = "fk.pl -M"+model_name+"/"+depth+"/f -N"+str(NFFT)+"/"+str(dt)+'/1/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr
+                command = "fk.pl -M"+model_name+"/"+depth+"/f -T"+str(tb)+" -N"+str(NFFT)+"/"+str(dt)+'/1/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr
                 command=split(command)
                 p=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 p.communicate() 
@@ -120,7 +121,7 @@ def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,
             
 
 def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,static,quasistatic2dynamic,tsunami,
-                            time_epi,beta,custom_stf,impulse,NFFT,dt,rank,size,single_force=False,insar=False,okada=False,mu_okada=45e9):
+                            time_epi,beta,custom_stf,impulse,NFFT,dt,rank,size,single_force=False,insar=False,okada=False,mu_okada=45e9,tb=50):
     '''
     Use green functions and compute synthetics at stations for a single source
     and multiple stations. This code makes an external system call to syn.c first it
@@ -173,7 +174,8 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
         okada = %s
         mu = %.2e
         single = %s
-        ''' %(home,project_name,station_file,model_name,str(integrate),str(static),str(tsunami),str(quasistatic2dynamic),str(time_epi),beta,custom_stf,impulse,insar,okada,mu_okada,single_force)
+        tb = %s
+        ''' %(home,project_name,station_file,model_name,str(integrate),str(static),str(tsunami),str(quasistatic2dynamic),str(time_epi),beta,custom_stf,impulse,insar,okada,mu_okada,single_force,tb)
         print(out)
         
     #Read your corresponding source file
@@ -182,7 +184,7 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
     #Constant parameters
     rakeDS=90+beta #90 is thrust, -90 is normal
     rakeSS=0+beta #0 is left lateral, 180 is right lateral
-    tb=50 #Number of samples before first arrival (should be 50, NEVER CHANGE, if you do then adjust in fk.pl)
+    tb=tb #Number of samples before first arrival (should be 50, NEVER CHANGE, if you do then adjust in fk.pl) ##Update from jk 12/3/2025 now can be changed with this input
     
     #Figure out custom STF
     if custom_stf.lower()!='none':
@@ -901,7 +903,7 @@ def run_parallel_teleseismics_green(home,project_name,time_epi,station_file,mode
 
                                             
                                                                   
-def run_parallel_synthetics_mt3d(home,project_name,station_file,model_name,forceMT,mt,insar,rank,size):
+def run_parallel_synthetics_mt3d(home,project_name,station_file,model_name,forceMT,mt,insar,rank,size,single_force=False,tb=50):
     '''
     Use green functions and compute synthetics at stations for a single source
     and multiple stations. This code makes an external system call to syn.c first it
@@ -967,7 +969,7 @@ def run_parallel_synthetics_mt3d(home,project_name,station_file,model_name,force
     mpi_source=genfromtxt(home+project_name+'/data/model_info/mpi_source.'+str(rank)+'.fault')
     
     #Constant parameters
-    tb=50 #Number of samples before first arrival (should be 50, NEVER CHANGE, if you do then adjust in fk.pl)
+    tb=tb #Number of samples before first arrival (should be 50, NEVER CHANGE, if you do then adjust in fk.pl) ##tb can be adjusted in fk now 12/3/2025 jk
     
     #Load structure
     model_file=home+project_name+'/structure/'+model_name
@@ -1320,7 +1322,8 @@ if __name__ == '__main__':
             single_force=True
         elif single_force=='False':
             single_force=False
-        run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax,tsunami,insar,rank,size,single_force)
+        tb=int(sys.argv[16])
+        run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax,tsunami,insar,rank,size,single_force,tb)
 
     
     elif sys.argv[1]=='run_parallel_synthetics':
