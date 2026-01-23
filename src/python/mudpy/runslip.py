@@ -317,10 +317,11 @@ def make_parallel_teleseismics_green(home,project_name,station_file,fault_name,m
    
 
 #Now make synthetics for source/station pairs
-def make_synthetics(home,project_name,station_file,fault_name,model_name,integrate,static,tsunami,beta,
-                    hot_start,time_epi,impulse=False,okada=False,mu=45e9,insar=False,tb=50):
+def make_synthetics(home,project_name,station_file,fault_name,model_name,integrate,static,quasistatic2dynamic,
+                             tsunami,beta,hot_start,time_epi,ncpus,custom_stf,NFFT,dt,impulse=False,single_force=False,insar=False,okada=False,mu=45e9,tb=50,smth=1):
     '''
-    This routine will take the impulse response (GFs) and pass it into the routine that will
+    **This routine was absolete so it was removed and rerouted to make_parallel_synthetics with single CPU**
+    This will take the impulse response (GFs) and pass it into the routine that will
     convovle them with the source time function according to each subfaults strike and dip.
     The result fo this computation is a time series dubbed a "synthetic"
     
@@ -338,32 +339,10 @@ def make_synthetics(home,project_name,station_file,fault_name,model_name,integra
     OUT:
         Nothing
     '''
-    from mudpy import green
-    import datetime
-    from numpy import loadtxt
-    import gc
-    
-    green_path=home+project_name+'/GFs/'
-    station_file=home+project_name+'/data/station_info/'+station_file
-    fault_file=home+project_name+'/data/model_info/'+fault_name
-    logpath=home+project_name+'/logs/'
-    #Time for log file
-    now=datetime.datetime.now()
-    now=now.strftime('%b-%d-%H%M')
-    #First read fault model file
-    source=loadtxt(fault_file,ndmin=2)
-    #Now compute synthetics please, one sub fault at a time
-    for k in range(hot_start,source.shape[0]):
-        print('ksource = ' + str(k))
-        subfault=str(k+1).rjust(4,'0')
-        log=green.run_syn(home,project_name,source[k,:],station_file,green_path,model_name,integrate,static,tsunami,
-                subfault,time_epi,beta,impulse,okada,mu,insar=insar,tb=tb)
-        f=open(logpath+'make_synth.'+now+'.log','a')
-        f.write(log)
-        f.close()
-        gc.collect()
+
+    make_parallel_synthetics(home,project_name,station_file,fault_name,model_name,integrate,static,quasistatic2dynamic,
+                             tsunami,beta,hot_start,time_epi,1,custom_stf,NFFT,dt,impulse=False,single_force=False,insar=False,okada=False,mu=45e9,tb=50,smth=1):
         
-#Now make synthetics for source/station pairs
 def make_parallel_synthetics(home,project_name,station_file,fault_name,model_name,integrate,static,quasistatic2dynamic,
                              tsunami,beta,hot_start,time_epi,ncpus,custom_stf,NFFT,dt,impulse=False,single_force=False,insar=False,okada=False,mu=45e9,tb=50,smth=1):
     '''
