@@ -5,7 +5,7 @@ Green functions routines for source models
 
 
         
-def run_green(source,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax):
+def run_green(source,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax,smth):
     '''
     Compute GFs using Zhu & Rivera code for a given velocity model, source depth
     and station file. This function will make an external system call to fk.pl
@@ -33,8 +33,8 @@ def run_green(source,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax):
     for k in range(len(d)):
         diststr=diststr+' %.3f' % d[k] #Truncate distance to 3 decimal palces (meters)
     if static==0: #Compute full waveform
-        command=split("fk.pl -M"+model_name+"/"+depth+"/f -N"+str(NFFT)+"/"+str(dt)+'/1/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr)
-        print("fk.pl -M"+model_name+"/"+depth+"/f -N"+str(NFFT)+"/"+str(dt)+'/1/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr)
+        command=split("fk.pl -M"+model_name+"/"+depth+"/f -N"+str(NFFT)+"/"+str(dt)+'/'+str(smth)+'/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr)
+        print("fk.pl -M"+model_name+"/"+depth+"/f -N"+str(NFFT)+"/"+str(dt)+'/'+str(smth)+'/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr)
         print(command)
         p=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         out,err=p.communicate()
@@ -57,7 +57,7 @@ def run_green(source,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax):
     
     
 def run_syn(home,project_name,source,station_file,green_path,model_name,integrate,static,tsunami,
-        subfault,time_epi,beta,impulse=False,okada=False,okada_mu=45e9,insar=False):
+        subfault,time_epi,beta,impulse=False,okada=False,okada_mu=45e9,insar=False,tb=50):
     '''
     Use green functions and compute synthetics at stations for a single source
     and multiple stations. This code makes an external system call to syn.c first it
@@ -89,7 +89,7 @@ def run_syn(home,project_name,source,station_file,green_path,model_name,integrat
     #Constant parameters
     rakeDS=90+beta #90 is thrust, -90 is normal
     rakeSS=0+beta #0 is left lateral, 180 is right lateral
-    tb=50 #Number of samples before first arrival
+    #tb=50 #Number of samples before first arrival ## tb is now an input for run_syn and changes based on if there was an input added 12/10/2025 JK
     #Load structure
     model_file=home+project_name+'/structure/'+model_name
     structure=loadtxt(model_file,ndmin=2)
@@ -466,7 +466,7 @@ def src2sta(station_file,source,output_coordinates=False):
     
     
 
-def origin_time(st,time_epi,tb):
+def origin_time(st,time_epi,tb,dt):
     '''
     Make start time of synthetics correspond with epicentral time
     
@@ -483,13 +483,10 @@ def origin_time(st,time_epi,tb):
     '''
     
     from datetime import timedelta
-    
-    t1=st[0].stats.starttime  #Waveform starttime
-    td=timedelta(seconds=st[0].stats.delta*tb)  #Shift due to pre-first arrival samples
-    #Shift forward
-    t1=t1+td
-    #Shift to oring time
-    t1=time_epi+timedelta(minutes=t1.minute,seconds=t1.second,microseconds=t1.microsecond)-td
+
+    p_wave_time = dt * tb + st[0].stats.sac.b #fk calculated time for p wave arrival time
+    padding = dt * tb #padding time input
+    t1 = time_epi + p_wave_time - padding #adjusted time for event, based on p wave arrival time and zero padding
     st[0].stats.starttime=t1
     #Set default sac headers to avoid invalid SAC write
     st[0].stats.sac['nzyear'] = t1.year

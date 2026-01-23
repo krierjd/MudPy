@@ -3,7 +3,7 @@ Module for routines that use paralell computing
 '''
 
 
-def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax,tsunami,insar,rank,size,single_force,tb=50):
+def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax,tsunami,insar,rank,size,single_force,tb=50,smth=1):
     '''
     Compute GFs using Zhu & Rivera code for a given velocity model, source depth
     and station file. This function will make an external system call to fk.pl
@@ -46,7 +46,8 @@ def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,
         insar = %s
         single = %s
         tb = %s
-        ''' %(home,project_name,station_file,model_name,str(static),str(tsunami),dt,NFFT,dk,pmin,pmax,kmax,str(insar),str(single_force),str(tb))
+        smth = %s
+        ''' %(home,project_name,station_file,model_name,str(static),str(tsunami),dt,NFFT,dk,pmin,pmax,kmax,str(insar),str(single_force),str(tb),str(smth))
         print(out)
     #read your corresponding source file
     source=genfromtxt(home+project_name+'/data/model_info/mpi_source.'+str(rank)+'.fault')
@@ -80,7 +81,7 @@ def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,
         #Make the calculation
         if static==0: #Compute full waveform
             if single_force==1: #compute for a single force and not coupled
-                command = "fk.pl -M"+model_name+"/"+depth+"/f -S1 -T"+str(tb)+" -G15 -N"+str(NFFT)+"/"+str(dt)+'/8/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr
+                command = "fk.pl -M"+model_name+"/"+depth+"/f -S1 -T"+str(tb)+" -G15 -N"+str(NFFT)+"/"+str(dt)+'/'+str(smth)+'/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr
                 command=split(command)
                 p=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 p.communicate() 
@@ -91,7 +92,7 @@ def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,
                     copy(f,newf)
                 rmtree(subfault_folder+'/'+model_name+'_'+depth)
             else:
-                command = "fk.pl -M"+model_name+"/"+depth+"/f -T"+str(tb)+" -N"+str(NFFT)+"/"+str(dt)+'/1/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr
+                command = "fk.pl -M"+model_name+"/"+depth+"/f -T"+str(tb)+" -N"+str(NFFT)+"/"+str(dt)+'/'+str(smth)+'/'+repr(dk)+' -P'+repr(pmin)+'/'+repr(pmax)+'/'+repr(kmax)+diststr
                 command=split(command)
                 p=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 p.communicate() 
@@ -101,7 +102,6 @@ def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,
                     newf=subfault_folder+'/'+f.split('/')[-1]
                     copy(f,newf)
                 rmtree(subfault_folder+'/'+model_name+'_'+depth)
-            print(command)
         else: #Compute only statics
             if insar==True:
                 suffix='insar'
@@ -121,7 +121,7 @@ def run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,
             
 
 def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,static,quasistatic2dynamic,tsunami,
-                            time_epi,beta,custom_stf,impulse,NFFT,dt,rank,size,single_force=False,insar=False,okada=False,mu_okada=45e9,tb=50):
+                            time_epi,beta,custom_stf,impulse,NFFT,dt,rank,size,single_force=False,insar=False,okada=False,mu_okada=45e9,tb=50,smth=1):
     '''
     Use green functions and compute synthetics at stations for a single source
     and multiple stations. This code makes an external system call to syn.c first it
@@ -175,7 +175,8 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
         mu = %.2e
         single = %s
         tb = %s
-        ''' %(home,project_name,station_file,model_name,str(integrate),str(static),str(tsunami),str(quasistatic2dynamic),str(time_epi),beta,custom_stf,impulse,insar,okada,mu_okada,single_force,tb)
+        smth = %s
+        ''' %(home,project_name,station_file,model_name,str(integrate),str(static),str(tsunami),str(quasistatic2dynamic),str(time_epi),beta,custom_stf,impulse,insar,okada,mu_okada,single_force,tb,smth)
         print(out)
         
     #Read your corresponding source file
@@ -327,7 +328,6 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                             commandDS="syn -I -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeDS)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.disp.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
-                    print(commandSS)
                 else: #Make vel.
                     #First Stike-Slip GFs
                     if custom_stf==None:
@@ -391,9 +391,9 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     n[0].data[0:tb]=0
                     e[0].data[0:tb]=0
                     z[0].data[0:tb]=0
-                    n=origin_time(n,time_epi,tb)
-                    e=origin_time(e,time_epi,tb)
-                    z=origin_time(z,time_epi,tb)
+                    n=origin_time(n,time_epi,tb,dt)
+                    e=origin_time(e,time_epi,tb,dt)
+                    z=origin_time(z,time_epi,tb,dt)
                     n.write(staname[k]+".subfault"+num+'.SS.disp.n',format='SAC')
                     e.write(staname[k]+".subfault"+num+'.SS.disp.e',format='SAC')
                     z.write(staname[k]+".subfault"+num+'.SS.disp.z',format='SAC')
@@ -418,9 +418,9 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     e=t.copy()
                     e[0].data=etemp/100
                     z[0].data=z[0].data/100
-                    n=origin_time(n,time_epi,tb)
-                    e=origin_time(e,time_epi,tb)
-                    z=origin_time(z,time_epi,tb)
+                    n=origin_time(n,time_epi,tb,dt)
+                    e=origin_time(e,time_epi,tb,dt)
+                    z=origin_time(z,time_epi,tb,dt)
                     n.write(staname[k]+".subfault"+num+'.DS.disp.n',format='SAC')
                     e.write(staname[k]+".subfault"+num+'.DS.disp.e',format='SAC')
                     z.write(staname[k]+".subfault"+num+'.DS.disp.z',format='SAC')
@@ -446,9 +446,9 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     e=t.copy()
                     e[0].data=etemp/100
                     z[0].data=z[0].data/100
-                    n=origin_time(n,time_epi,tb)
-                    e=origin_time(e,time_epi,tb)
-                    z=origin_time(z,time_epi,tb)
+                    n=origin_time(n,time_epi,tb,dt)
+                    e=origin_time(e,time_epi,tb,dt)
+                    z=origin_time(z,time_epi,tb.dt)
                     n.write(staname[k]+".subfault"+num+'.SS.vel.n',format='SAC')
                     e.write(staname[k]+".subfault"+num+'.SS.vel.e',format='SAC')
                     z.write(staname[k]+".subfault"+num+'.SS.vel.z',format='SAC')
@@ -473,9 +473,9 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     e=t.copy()
                     e[0].data=etemp/100
                     z[0].data=z[0].data/100
-                    n=origin_time(n,time_epi,tb)
-                    e=origin_time(e,time_epi,tb)
-                    z=origin_time(z,time_epi,tb)
+                    n=origin_time(n,time_epi,tb,dt)
+                    e=origin_time(e,time_epi,tb,dt)
+                    z=origin_time(z,time_epi,tb.dt)
                     n.write(staname[k]+".subfault"+num+'.DS.vel.n',format='SAC')
                     e.write(staname[k]+".subfault"+num+'.DS.vel.e',format='SAC')
                     z.write(staname[k]+".subfault"+num+'.DS.vel.z',format='SAC')
@@ -1323,7 +1323,8 @@ if __name__ == '__main__':
         elif single_force=='False':
             single_force=False
         tb=int(sys.argv[16])
-        run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax,tsunami,insar,rank,size,single_force,tb)
+        smth=int(sys.argv[17])
+        run_parallel_green(home,project_name,station_file,model_name,dt,NFFT,static,dk,pmin,pmax,kmax,tsunami,insar,rank,size,single_force,tb,smth)
 
     
     elif sys.argv[1]=='run_parallel_synthetics':
@@ -1362,8 +1363,10 @@ if __name__ == '__main__':
             single_force=True
         elif single_force=='False':
             single_force=False
+        tb=int(sys.argv[20])
+        smth=int(sys.argv[21])
 
-        run_parallel_synthetics(home,project_name,station_file,model_name,integrate,static,quasistatic2dynamic,tsunami,time_epi,beta,custom_stf,impulse,NFFT,dt,rank,size,single_force,insar,okada,mu_okada)
+        run_parallel_synthetics(home,project_name,station_file,model_name,integrate,static,quasistatic2dynamic,tsunami,time_epi,beta,custom_stf,impulse,NFFT,dt,rank,size,single_force,insar,okada,mu_okada,tb,smth)
     
     elif sys.argv[1]=='run_parallel_teleseismics_green':
         home=sys.argv[2]
