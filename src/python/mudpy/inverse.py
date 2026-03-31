@@ -1612,7 +1612,7 @@ def get_stats(WG,sol,wd,Ls):
     '''
     
     from numpy.linalg import norm
-    
+
     wds=WG.dot(sol)
     L2=norm(wds-wd)
     Lm=norm(Ls.dot(sol))

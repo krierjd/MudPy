@@ -296,13 +296,19 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     #First Stike-Slip GFs
                     if custom_stf==None:
                         if single_force==True:
+                            #North Force
                             commandSS="syn -I -M"+str(Mag)+"/"+str(strikeSS)+"/"+str(dip)+" -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.disp.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS) #Split string into lexical components for system call
-                            #Now dip slip
+                            #East Force
                             commandDS="syn -I -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.disp.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
+                            #Vertical force
+                            commandZF="syn -I -M"+str(Mag)+"/0/-90 -D"+str(duration)+ \
+                                "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".ZF.disp.x -G"+green_path+diststr+".grn.0"
+                            commandZF=split(commandSS) #Split string into lexical components for system call
+
                         else:
                             commandSS="syn -I -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeSS)+" -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.disp.x -G"+green_path+diststr+".grn.0"
@@ -313,13 +319,18 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                             commandDS=split(commandDS)
                     else:
                         if single_force==True:
+                            #North Force
                             commandSS="syn -I -M"+str(Mag)+"/"+str(strikess)+"/"+str(dip)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.disp.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS) #Split string into lexical components for system call
-                            #Now dip slip
+                            #East Force
                             commandDS="syn -I -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.disp.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
+                            #Vertical Force
+                            commandZF="syn -I -M"+str(Mag)+"/0/-90 -S"+custom_stf+ \
+                                " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".ZF.disp.x -G"+green_path+diststr+".grn.0"
+                            commandZF=split(commandZF)
                         else:
                             commandSS="syn -I -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeSS)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.disp.x -G"+green_path+diststr+".grn.0"
@@ -332,30 +343,40 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     #First Stike-Slip GFs
                     if custom_stf==None:
                         if single_force==True:
+                            #North Force
                             commandSS="syn -M"+str(Mag)+"/"+str(strikeSS)+"/"+str(dip)+" -D"+str(duration)+ \
-                            "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.vel.x -G"+green_path+diststr+".grn.0"
+                                "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.vel.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS)
-                            #Now dip slip
+                            #East Force
                             commandDS="syn -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -D"+str(duration)+ \
-                            "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.vel.x -G"+green_path+diststr+".grn.0"
+                                "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.vel.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
+                            #Vertical Force
+                            commandZF="syn -M"+str(Mag)+"/0/-90 -D"+str(duration)+ \
+                                "/"+str(rise)+" -A"+str(az[k])+"- O"+staname[k]+".subfault"+num+".ZF.vel.x -G"+green_path+diststr+".grn.0"
+                            commandZF=split(commandZF)
                         else:
                             commandSS="syn -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeSS)+" -D"+str(duration)+ \
-                            "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.vel.x -G"+green_path+diststr+".grn.0"
+                                "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.vel.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS)
                             #Now dip slip
                             commandDS="syn -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeDS)+" -D"+str(duration)+ \
-                            "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.vel.x -G"+green_path+diststr+".grn.0"
+                                "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.vel.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
                     else:
                         if single_force==True:    
+                            #North Force
                             commandSS="syn -M"+str(Mag)+"/"+str(strikeSS)+"/"+str(dip)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.vel.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS)
-                            #Now dip slip
+                            #East Force
                             commandDS="syn -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.vel.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
+                            #Vertical Force
+                            commandZF="syn -M"+str(Mag)+"/0/-90 -S"+custom_stf+ \
+                                "-A"+str(az[k])+" -O"+statname[k]+".subfault"+num+".ZF.vel.x -G"+green_path+diststr+".grn.0"
+                            commandZF=split(commandZF)
                         else:
                             commandSS="syn -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeSS)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.vel.x -G"+green_path+diststr+".grn.0"
@@ -448,7 +469,7 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     z[0].data=z[0].data/100
                     n=origin_time(n,time_epi,tb,dt)
                     e=origin_time(e,time_epi,tb,dt)
-                    z=origin_time(z,time_epi,tb.dt)
+                    z=origin_time(z,time_epi,tb,dt)
                     n.write(staname[k]+".subfault"+num+'.SS.vel.n',format='SAC')
                     e.write(staname[k]+".subfault"+num+'.SS.vel.e',format='SAC')
                     z.write(staname[k]+".subfault"+num+'.SS.vel.z',format='SAC')
@@ -475,7 +496,7 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     z[0].data=z[0].data/100
                     n=origin_time(n,time_epi,tb,dt)
                     e=origin_time(e,time_epi,tb,dt)
-                    z=origin_time(z,time_epi,tb.dt)
+                    z=origin_time(z,time_epi,tb,dt)
                     n.write(staname[k]+".subfault"+num+'.DS.vel.n',format='SAC')
                     e.write(staname[k]+".subfault"+num+'.DS.vel.e',format='SAC')
                     z.write(staname[k]+".subfault"+num+'.DS.vel.z',format='SAC')
@@ -664,6 +685,7 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                         #"coef" in the syn.c original source code ############JUSTIN EDITS############
                         if single_force==True:
                             scale = Mag*1e-15 #definition used in syn.c line 139
+                            print(f'this is the {scale}')
                         ############## END OF EDITS ###################
                         else:
                             scale = 10**(1.5*Mw+16.1-20) #definition used in syn.c

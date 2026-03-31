@@ -341,7 +341,7 @@ def make_synthetics(home,project_name,station_file,fault_name,model_name,integra
     '''
 
     make_parallel_synthetics(home,project_name,station_file,fault_name,model_name,integrate,static,quasistatic2dynamic,
-                             tsunami,beta,hot_start,time_epi,1,custom_stf,NFFT,dt,impulse=False,single_force=False,insar=False,okada=False,mu=45e9,tb=50,smth=1):
+            tsunami,beta,hot_start,time_epi,1,custom_stf,NFFT,dt,impulse=False,single_force=False,insar=False,okada=False,mu=45e9,tb=50,smth=1)
         
 def make_parallel_synthetics(home,project_name,station_file,fault_name,model_name,integrate,static,quasistatic2dynamic,
                              tsunami,beta,hot_start,time_epi,ncpus,custom_stf,NFFT,dt,impulse=False,single_force=False,insar=False,okada=False,mu=45e9,tb=50,smth=1):
