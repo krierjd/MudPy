@@ -652,7 +652,7 @@ def teleseismicGFs(home,project_name,GF_list_teleseismic,fault_name,model_name,t
 def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_from_file,G_name,epicenter,
                 rupture_speed,num_windows,reg_spatial,reg_temporal,nfaults,beta,decimate,bandpass,
                 solver,bounds,weight=False,Ltype=2,target_moment=None,data_vector=None,weights_file=None,
-                onset_file=None,GOD_inversion=False):
+                onset_file=None,GOD_inversion=False,single_force=0):
     '''
     Assemble G and d, determine smoothing and run the inversion
     '''
@@ -678,7 +678,7 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
         d=load(data_vector) 
     #Get GFs
     G=inv.getG(home,project_name,fault_name,model_name,GF_list,G_from_file,G_name,epicenter,
-                rupture_speed,num_windows,decimate,bandpass,onset_file=onset_file)
+                rupture_speed,num_windows,decimate,bandpass,onset_file=onset_file,single_force=single_force)
     
     # Force faults inside a polygon to be zero (not contribute to inversion, 
     # useful for testing sensitivites)

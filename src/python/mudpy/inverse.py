@@ -17,7 +17,7 @@ Functions in this module:
 
 
 def getG(home,project_name,fault_name,model_name,GF_list,G_from_file,G_name,epicenter,rupture_speed,
-        num_windows,decimate,bandpass,tsunami=False,onset_file=None):
+        num_windows,decimate,bandpass,tsunami=False,onset_file=None,single_force=0):
     '''
     Assemble Green functions matrix. If requested will parse all available synthetics on file and build the matrix.
     Otherwise, if it exists, it will be loaded from file 
@@ -121,14 +121,14 @@ def getG(home,project_name,fault_name,model_name,GF_list,G_from_file,G_name,epic
                         tdelay =  tdelay_constant+trupt[krup,:]
                     if krup==0: #First rupture speed
                         first_window=True
-                        Ess=[] ; Eds=[] ; Nss=[] ; Nds=[] ; Zss=[] ; Zds=[]
+                        Ess=[] ; Eds=[] ; Ezf=[] ; Nss=[] ; Nds=[] ; Nzf=[] ; Zss=[] ; Zds=[] ; Zzf=[]
                         Gdisp_temp,Ess,Eds,Nss,Nds,Zss,Zds = makeG(home,project_name,fault_name,model_name,split(mini_station)[1],
-                                                                gftype,tsunami,tdelay,decimate,bandpass,first_window,Ess,Eds,Nss,Nds,Zss,Zds)
+                                                                gftype,tsunami,tdelay,decimate,bandpass,first_window,Ess,Eds,Nss,Nds,Zss,Zds,Ezf,Nzf,Zzf,single_force=single_force)
                         Gdisp=Gdisp_temp
                     else:
                         first_window=False
                         Gdisp_temp,Ess,Eds,Nss,Nds,Zss,Zds = makeG(home,project_name,fault_name,model_name,split(mini_station)[1],
-                                                                gftype,tsunami,tdelay,decimate,bandpass,first_window,Ess,Eds,Nss,Nds,Zss,Zds)
+                                                                gftype,tsunami,tdelay,decimate,bandpass,first_window,Ess,Eds,Nss,Nds,Zss,Zds,Ezf,Nzf,Zzf,single_force=single_force)
                         Gdisp=c_[Gdisp,Gdisp_temp]
                 remove(mini_station) #Cleanup 
         #Velocity waveforms
@@ -250,7 +250,7 @@ def getG(home,project_name,fault_name,model_name,GF_list,G_from_file,G_name,epic
     
     
 def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,tdelay,
-          decimate,bandpass,first_window,Ess,Eds,Nss,Nds,Zss,Zds):
+          decimate,bandpass,first_window,Ess,Eds,Nss,Nds,Zss,Zds,Ezf,Nzf,Zzf,single_force=0):
     '''
     This routine is called from getG and will assemble the GFs from available synthetics
     depending on data type requested (statics, dispalcement or velocity waveforms).
@@ -276,6 +276,10 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
     from mudpy.forward import highpass as hfilt
     from mudpy.green import stdecimate
     
+###########################
+    print(single_force)
+###########################
+
     #Load fault model
     source=loadtxt(home+project_name+'/data/model_info/'+fault_name,ndmin=2)
     Nfaults=source.shape[0] #Number of subfaults
