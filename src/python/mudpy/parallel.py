@@ -307,7 +307,7 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                             #Vertical force
                             commandZF="syn -I -M"+str(Mag)+"/0/-90 -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".ZF.disp.x -G"+green_path+diststr+".grn.0"
-                            commandZF=split(commandSS) #Split string into lexical components for system call
+                            commandZF=split(commandZF) #Split string into lexical components for system call
 
                         else:
                             commandSS="syn -I -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeSS)+" -D"+str(duration)+ \
@@ -390,6 +390,10 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                 p.communicate() 
                 p=subprocess.Popen(commandDS)
                 p.communicate()
+                # vertical command for landslides
+                if single_force==True:
+                    p=subprocess.Popen(commandZF)
+                    p.communicate()
                 #Result is in RTZ system (+Z is down) rotate to NEZ with +Z up and scale to m or m/s
                 if integrate==1: #'tis displacememnt
                     #Strike slip
@@ -451,6 +455,40 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                         silentremove(staname[k]+".subfault"+num+'.DS.disp.ri')
                         silentremove(staname[k]+".subfault"+num+'.DS.disp.ti')
                         silentremove(staname[k]+".subfault"+num+'.DS.disp.zi')
+                    #Vertical component for landslides###########################
+                    if single_force==True:
+                        if duration>0: #Is there a source time fucntion? Yes!
+                            r=read(staname[k]+".subfault"+num+'.ZF.disp.r')
+                            t=read(staname[k]+".subfault"+num+'.ZF.disp.t')
+                            z=read(staname[k]+".subfault"+num+'.ZF.disp.z')
+                        else: #No! This is the impulse response!
+                            r=read(staname[k]+".subfault"+num+'.ZF.disp.ri')
+                            t=read(staname[k]+".subfault"+num+'.ZF.disp.ti')
+                            z=read(staname[k]+".subfault"+num+'.ZF.disp.zi')
+                        ntemp,etemp=rt2ne(r[0].data,t[0].data,az[k])
+                        #Scale to m and overwrite with rotated waveforms
+                        n=r.copy()
+                        n[0].data=ntemp/100
+                        e=t.copy()
+                        e[0].data=etemp/100
+                        z[0].data=z[0].data/100
+                        # get rid of numerical "noise" in the first tb samples
+                        n[0].data[0:tb]=0
+                        e[0].data[0:tb]=0
+                        z[0].data[0:tb]=0
+                        n=origin_time(n,time_epi,tb,dt)
+                        e=origin_time(e,time_epi,tb,dt)
+                        z=origin_time(z,time_epi,tb,dt)
+                        n.write(staname[k]+".subfault"+num+'.ZF.disp.n',format='SAC')
+                        e.write(staname[k]+".subfault"+num+'.ZF.disp.e',format='SAC')
+                        z.write(staname[k]+".subfault"+num+'.ZF.disp.z',format='SAC')
+                        silentremove(staname[k]+".subfault"+num+'.ZF.disp.r')
+                        silentremove(staname[k]+".subfault"+num+'.ZF.disp.t')
+                        if impulse==True:
+                            silentremove(staname[k]+".subfault"+num+'.ZF.disp.ri')
+                            silentremove(staname[k]+".subfault"+num+'.ZF.disp.ti')
+                            silentremove(staname[k]+".subfault"+num+'.ZF.disp.zi')
+                        ############################################
                 else: #Waveforms are velocity, as before, rotate from RT-Z to NE+Z and scale to m/s
                     #Strike slip
                     if duration>0: #Is there a source time fucntion? Yes!
@@ -506,7 +544,35 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                         silentremove(staname[k]+".subfault"+num+'.DS.vel.ri')
                         silentremove(staname[k]+".subfault"+num+'.DS.vel.ti')
                         silentremove(staname[k]+".subfault"+num+'.DS.vel.zi')
-            
+                     #Vertical Componenent for landslides #########################
+                    if single_force==True:
+                        if duration>0: #Is there a source time fucntion? Yes!
+                            r=read(staname[k]+".subfault"+num+'.ZF.vel.r')
+                            t=read(staname[k]+".subfault"+num+'.ZF.vel.t')
+                            z=read(staname[k]+".subfault"+num+'.ZF.vel.z')
+                        else: #No! This is the impulse response!
+                            r=read(staname[k]+".subfault"+num+'.ZF.vel.ri')
+                            t=read(staname[k]+".subfault"+num+'.ZF.vel.ti')
+                            z=read(staname[k]+".subfault"+num+'.ZF.vel.zi')
+                        ntemp,etemp=rt2ne(r[0].data,t[0].data,az[k])
+                        n=r.copy()
+                        n[0].data=ntemp/100
+                        e=t.copy()
+                        e[0].data=etemp/100
+                        z[0].data=z[0].data/100
+                        n=origin_time(n,time_epi,tb,dt)
+                        e=origin_time(e,time_epi,tb,dt)
+                        z=origin_time(z,time_epi,tb,dt)
+                        n.write(staname[k]+".subfault"+num+'.ZF.vel.n',format='SAC')
+                        e.write(staname[k]+".subfault"+num+'.ZF.vel.e',format='SAC')
+                        z.write(staname[k]+".subfault"+num+'.ZF.vel.z',format='SAC')
+                        silentremove(staname[k]+".subfault"+num+'.ZF.vel.r')
+                        silentremove(staname[k]+".subfault"+num+'.ZF.vel.t')
+                        if impulse==True:
+                            silentremove(staname[k]+".subfault"+num+'.ZF.vel.ri')
+                            silentremove(staname[k]+".subfault"+num+'.ZF.vel.ti')
+                            silentremove(staname[k]+".subfault"+num+'.ZF.vel.zi')
+            #####################################################
             elif static==0 and quasistatic2dynamic==1 : #Convert statics to ramp waveforms
             
                 #site name

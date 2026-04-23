@@ -276,10 +276,6 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
     from mudpy.forward import highpass as hfilt
     from mudpy.green import stdecimate
     
-###########################
-    print(single_force)
-###########################
-
     #Load fault model
     source=loadtxt(home+project_name+'/data/model_info/'+fault_name,ndmin=2)
     Nfaults=source.shape[0] #Number of subfaults
@@ -424,6 +420,9 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                 BP=bandpass[0]
 
         if first_window==True: #Read in GFs from file
+            ########################
+            print('HAVE WE MADE IT HERE??')
+            ########################
             ktrace=0
             for ksta in range(Nsta):
                 print('Reading green functions for station #'+str(ksta+1)+' of '+str(Nsta))
@@ -444,6 +443,10 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                         Eds=read(syn_path+staname[ksta]+'.'+nfault+'.DS.'+vord+'.e')
                         Nds=read(syn_path+staname[ksta]+'.'+nfault+'.DS.'+vord+'.n')
                         Zds=read(syn_path+staname[ksta]+'.'+nfault+'.DS.'+vord+'.z')
+                        if single_force==1:
+                            Ezf=read(syn_path+staname[ksta]+'.'+nfault+'.ZF.'+vord+'.e')
+                            Nzf=read(syn_path+staname[ksta]+'.'+nfault+'.ZF.'+vord+'.n')
+                            Zzf=read(syn_path+staname[ksta]+'.'+nfault+'.ZF.'+vord+'.z')
                     else: #Just add to stream object
                         Ess+=read(syn_path+staname[ksta]+'.'+nfault+'.SS.'+vord+'.e')
                         Nss+=read(syn_path+staname[ksta]+'.'+nfault+'.SS.'+vord+'.n')
@@ -451,6 +454,10 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                         Eds+=read(syn_path+staname[ksta]+'.'+nfault+'.DS.'+vord+'.e')
                         Nds+=read(syn_path+staname[ksta]+'.'+nfault+'.DS.'+vord+'.n')
                         Zds+=read(syn_path+staname[ksta]+'.'+nfault+'.DS.'+vord+'.z')
+                        if single_force==1:
+                            Ezf+=read(syn_path+staname[ksta]+'.'+nfault+'.ZF.'+vord+'.e')
+                            Nzf+=read(syn_path+staname[ksta]+'.'+nfault+'.ZF.'+vord+'.n')
+                            Zzf+=read(syn_path+staname[ksta]+'.'+nfault+'.ZF.'+vord+'.z')
                     #Perform operations that need to only happen once (filtering and decimation)
                     if any(BP!=None):# or ksta==1: #Apply filter to GFs
                         if kfault==0:
@@ -466,7 +473,12 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                             Zss[ktrace].data=hfilt(Zss[ktrace].data,BP[0],fsample,2)
                             Eds[ktrace].data=hfilt(Eds[ktrace].data,BP[0],fsample,2)
                             Nds[ktrace].data=hfilt(Nds[ktrace].data,BP[0],fsample,2)
-                            Zds[ktrace].data=hfilt(Zds[ktrace].data,BP[0],fsample,2)                        
+                            Zds[ktrace].data=hfilt(Zds[ktrace].data,BP[0],fsample,2)
+                            if single_force==1:
+                                Ezf[ktrace].data=hfilt(Ezf[ktrace].data,BP[0],fsample,2)
+                                Nzf[ktrace].data=hfilt(Nzf[ktrace].data,BP[0],fsample,2)
+                                Zzf[ktrace].data=hfilt(Zzf[ktrace].data,BP[0],fsample,2)
+                                print('.... For a single force')
                         else: #A low pass or bandpass filter has been requested
                             if kfault==0:
                                 print('.... lowpass')
@@ -482,6 +494,11 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                             Eds[ktrace].data=lfilt(Eds[ktrace].data,BP,fsample,2)
                             Nds[ktrace].data=lfilt(Nds[ktrace].data,BP,fsample,2)
                             Zds[ktrace].data=lfilt(Zds[ktrace].data,BP,fsample,2)
+                            if single_force==1:
+                                Ezf[ktrace].data=lfilt(Ezf[ktrace].data,BP,fsample,2)
+                                Nzf[ktrace].data=lfilt(Nzf[ktrace].data,BP,fsample,2)
+                                Zzf[ktrace].data=lfilt(Zzf[ktrace].data,BP,fsample,2)
+                                print('.... For a single force')
                         #bandpass=None
                     
                     ### HAAAAAACCCCKKKK!!!!
@@ -507,7 +524,10 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                         Eds[ktrace]=stdecimate(Eds[ktrace],decimate)
                         Nds[ktrace]=stdecimate(Nds[ktrace],decimate)
                         Zds[ktrace]=stdecimate(Zds[ktrace],decimate)
-                        
+                        if single_force==1:
+                            Ezf[ktrace]=stdecimate(Ezf[ktrace],decimate)
+                            Nzf[ktrace]=stdecimate(Nzf[ktrace],decimate)
+                            Zzf[ktrace]=stdecimate(Zzf[ktrace],decimate)                        
                     
                     ktrace+=1            
         #Read time series
@@ -541,12 +561,20 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                 eds=Stream(Trace())
                 nds=Stream(Trace())
                 zds=Stream(Trace())
+                if single_force==1:
+                    ezf=Stream(Trace())
+                    nzf=Stream(Trace())
+                    zzf=Stream(Trace())
                 ess[0]=Ess[ktrace].copy()
                 nss[0]=Nss[ktrace].copy()
                 zss[0]=Zss[ktrace].copy()
                 eds[0]=Eds[ktrace].copy()
                 nds[0]=Nds[ktrace].copy()
                 zds[0]=Zds[ktrace].copy()
+                if single_force==1:
+                    ezf[0]=Ezf[ktrace].copy()
+                    nzf[0]=Nzf[ktrace].copy()
+                    zzf[0]=Zzf[ktrace].copy()
                 #Time shift them according to subfault rupture time, zero pad, round to dt interval,decimate
                 #and extend to maximum time
                 ess=tshift(ess,tdelay[kfault])
@@ -555,6 +583,10 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                 eds=tshift(eds,tdelay[kfault])
                 nds=tshift(nds,tdelay[kfault])
                 zds=tshift(zds,tdelay[kfault])
+                if single_force==1:
+                    ezf=tshift(ezf,tdelay[kfault])
+                    nzf=tshift(nzf,tdelay[kfault])
+                    zzf=tshift(zzf,tdelay[kfault])
                 #Now time align stuff                                
                 ess=resample_to_data(ess[0],Edata[ksta])
                 ess=prep_synth(ess,Edata[ksta])
@@ -568,14 +600,24 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                 nds=prep_synth(nds,Ndata[ksta])
                 zds=resample_to_data(zds[0],Udata[ksta])
                 zds=prep_synth(zds,Udata[ksta])
+                if single_force==1:
+                    ezf=resample_to_data(ezf[0],Edata[ksta])
+                    ezf=prep_synth(ezf,Edata[ksta])
+                    nzf=resample_to_data(nzf[0],Ndata[ksta])
+                    nzf=prep_synth(nzf,Ndata[ksta])
+                    zzf=resample_to_data(zzf[0],Udata[ksta])
+                    zzf=prep_synth(zzf,Udata[ksta])
                 #Insert into Gtemp then append to G
                 if kfault==0 and ksta==0: #It's the first subfault and station, initalize G
-                    G=gdims(datafiles,Nfaults,decimate) #Survey all stations to decide size of G
+                    G=gdims(datafiles,Nfaults,decimate,single_force=single_force) #Survey all stations to decide size of G
                 if kfault==0: #Initalize Gtemp (different size for each station)
                     #How many points left in the tiem series
                     npts=Edata[ksta].stats.npts
                     print("... ... "+str(npts)+" data points left over after decimation")
-                    Gtemp=zeros([3*npts,Nfaults*2])      
+                    if single_force==1:
+                        Gtemp=zeros([3*npts,Nfaults*3])
+                    else:
+                        Gtemp=zeros([3*npts,Nfaults*2])      
                 #Insert synthetics into Gtemp
                 Gtemp[0:npts,2*kfault]=nss.data
                 Gtemp[0:npts,2*kfault+1]=nds.data
@@ -583,6 +625,10 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                 Gtemp[npts:2*npts,2*kfault+1]=eds.data
                 Gtemp[2*npts:3*npts,2*kfault]=zss.data
                 Gtemp[2*npts:3*npts,2*kfault+1]=zds.data
+                if single_force==1:
+                    Gtemp[0:npts,2*kfault+3]=nzf.data
+                    Gtemp[npts:2*npts,2*kfault+3]=ezf.data
+                    Gtemp[2*npts:3*npts,2*kfault+3]=zzf.data
                 ktrace+=1
             #After looping through all subfaults Insert Gtemp into G
             G[insert_position:insert_position+3*npts,:]=Gtemp
@@ -820,7 +866,7 @@ def getdata(home,project_name,GF_list,decimate,bandpass,quiet=False):
     return D
           
     
-def getLs(home,project_name,fault_name,nfaults,num_windows,bounds):
+def getLs(home,project_name,fault_name,nfaults,num_windows,bounds,single_force=0):
     '''
     Make spatial regularization matrix based on finite difference Lapalce operator.
     This routine will request adjustments depending on the boundary conditions requested
@@ -850,7 +896,10 @@ def getLs(home,project_name,fault_name,nfaults,num_windows,bounds):
     nstrike=nfaults[0]
     ndip=nfaults[1]
     #Initalize
-    L=zeros((2*N,2*N))
+    if single_force==1:
+        L=zeros((3*N,3*N))
+    else:
+        L=zeros((2*N,2*N))
     #Which L am I building?
     print('Making discrete Laplace operator regularization matrix...')
     for kfault in range(N):#Loop over faults and fill regularization matrix
@@ -1475,7 +1524,7 @@ def prep_synth(syn,st):
         return 'Error in GF length'
     return syn
         
-def gdims(datafiles,nfaults,decimate):
+def gdims(datafiles,nfaults,decimate,single_force=0):
     '''
     Survey the data files to determine what dimension G will be and return a matrix of zeros 
     with the required dimensions
@@ -1500,7 +1549,10 @@ def gdims(datafiles,nfaults,decimate):
             print(str(u[0].stats.npts)+' pts in up component')
             print('ERROR: The 3 components of data are not the same length')
             return 'Error in forming G'
-    G=zeros([3*npts,nfaults*2])
+    if single_force==1:
+        G=zeros([3*npts,nfaults*3])
+    else:
+        G=zeros([3*npts,nfaults*2])
     return G 
 
 def gdims_tsun(datafiles,nfaults,decimate):

@@ -795,9 +795,6 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
     #######    END POLY FILTER STUFF
     
     
-    
-    
-    print(G.shape)                
     gc.collect()
     #Get data weights
     if weight==True:
@@ -843,9 +840,12 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
     static=False #Is it jsut a static inversion?
     if size(reg_spatial)>1:
         if Ltype==2: #Laplacian smoothing
-            Ls=inv.getLs(home,project_name,fault_name,nfaults,num_windows,bounds)
+            Ls=inv.getLs(home,project_name,fault_name,nfaults,num_windows,bounds,single_force=single_force)
         elif Ltype==0: #Tikhonov smoothing
-            N=nfaults[0]*nfaults[1]*num_windows*2 #Get total no. of model parameters
+            if single_force==1:
+                N=nfaults[0]*nfaults[1]*num_windows*3
+            else:
+                N=nfaults[0]*nfaults[1]*num_windows*2 #Get total no. of model parameters
             Ls=eye(N)
         elif Ltype==3:  #moment regularization
             N=nfaults[0]*nfaults[1]*num_windows*2 #Get total no. of model parameters
