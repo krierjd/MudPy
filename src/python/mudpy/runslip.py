@@ -931,6 +931,8 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
             #Compute synthetics
             ds=dot(G,sol)
             
+####################testprintJK
+            #print(sol)
             #Get stats
             L2,Lmodel=inv.get_stats(Kinv,sol,x,Ls)
             VR,L2data=inv.get_VR(home,project_name,GF_list,sol,d,ds,decimate,WG,wd)
@@ -952,7 +954,7 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
                 inv.write_synthetics_GOD(home,project_name,run_name,GF_list,ds,kout,decimate)
             else:
                 inv.write_synthetics(home,project_name,run_name,GF_list,G,sol,ds,kout,decimate)
-            inv.write_model(home,project_name,run_name,fault_name,model_name,rupture_speed,num_windows,epicenter,sol,kout,onset_file=onset_file)
+            inv.write_model(home,project_name,run_name,fault_name,model_name,rupture_speed,num_windows,epicenter,sol,kout,onset_file=onset_file,single_force=single_force)
             kout+=1
             dt1=datetime.now()-t1
             dt2=datetime.now()-ttotal

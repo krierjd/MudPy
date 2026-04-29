@@ -122,7 +122,7 @@ def getG(home,project_name,fault_name,model_name,GF_list,G_from_file,G_name,epic
                     if krup==0: #First rupture speed
                         first_window=True
                         Ess=[] ; Eds=[] ; Ezf=[] ; Nss=[] ; Nds=[] ; Nzf=[] ; Zss=[] ; Zds=[] ; Zzf=[]
-                        Gdisp_temp,Ess,Eds,Nss,Nds,Zss,Zds = makeG(home,project_name,fault_name,model_name,split(mini_station)[1],
+                        Gdisp_temp,Ess,Eds,Nss,Nds,Zss,Zds,Ezf,Nzf,Zzf = makeG(home,project_name,fault_name,model_name,split(mini_station)[1],
                                                                 gftype,tsunami,tdelay,decimate,bandpass,first_window,Ess,Eds,Nss,Nds,Zss,Zds,Ezf,Nzf,Zzf,single_force=single_force)
                         Gdisp=Gdisp_temp
                     else:
@@ -420,9 +420,6 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                 BP=bandpass[0]
 
         if first_window==True: #Read in GFs from file
-            ########################
-            print('HAVE WE MADE IT HERE??')
-            ########################
             ktrace=0
             for ksta in range(Nsta):
                 print('Reading green functions for station #'+str(ksta+1)+' of '+str(Nsta))
@@ -478,7 +475,6 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                                 Ezf[ktrace].data=hfilt(Ezf[ktrace].data,BP[0],fsample,2)
                                 Nzf[ktrace].data=hfilt(Nzf[ktrace].data,BP[0],fsample,2)
                                 Zzf[ktrace].data=hfilt(Zzf[ktrace].data,BP[0],fsample,2)
-                                print('.... For a single force')
                         else: #A low pass or bandpass filter has been requested
                             if kfault==0:
                                 print('.... lowpass')
@@ -498,7 +494,6 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                                 Ezf[ktrace].data=lfilt(Ezf[ktrace].data,BP,fsample,2)
                                 Nzf[ktrace].data=lfilt(Nzf[ktrace].data,BP,fsample,2)
                                 Zzf[ktrace].data=lfilt(Zzf[ktrace].data,BP,fsample,2)
-                                print('.... For a single force')
                         #bandpass=None
                     
                     ### HAAAAAACCCCKKKK!!!!
@@ -616,24 +611,29 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                     print("... ... "+str(npts)+" data points left over after decimation")
                     if single_force==1:
                         Gtemp=zeros([3*npts,Nfaults*3])
+                        idx=3
                     else:
-                        Gtemp=zeros([3*npts,Nfaults*2])      
+                        Gtemp=zeros([3*npts,Nfaults*2])
+                        idx=2
                 #Insert synthetics into Gtemp
-                Gtemp[0:npts,2*kfault]=nss.data
-                Gtemp[0:npts,2*kfault+1]=nds.data
-                Gtemp[npts:2*npts,2*kfault]=ess.data
-                Gtemp[npts:2*npts,2*kfault+1]=eds.data
-                Gtemp[2*npts:3*npts,2*kfault]=zss.data
-                Gtemp[2*npts:3*npts,2*kfault+1]=zds.data
+                Gtemp[0:npts,idx*kfault]=nss.data
+                Gtemp[0:npts,idx*kfault+1]=nds.data
+                Gtemp[npts:2*npts,idx*kfault]=ess.data
+                Gtemp[npts:2*npts,idx*kfault+1]=eds.data
+                Gtemp[2*npts:3*npts,idx*kfault]=zss.data
+                Gtemp[2*npts:3*npts,idx*kfault+1]=zds.data
                 if single_force==1:
-                    Gtemp[0:npts,2*kfault+3]=nzf.data
-                    Gtemp[npts:2*npts,2*kfault+3]=ezf.data
-                    Gtemp[2*npts:3*npts,2*kfault+3]=zzf.data
+                    Gtemp[0:npts,idx*kfault+2]=nzf.data
+                    Gtemp[npts:2*npts,idx*kfault+2]=ezf.data
+                    Gtemp[2*npts:3*npts,idx*kfault+2]=zzf.data
                 ktrace+=1
             #After looping through all subfaults Insert Gtemp into G
             G[insert_position:insert_position+3*npts,:]=Gtemp
             insert_position+=3*npts #Update for next station
-        return G,Ess,Eds,Nss,Nds,Zss,Zds
+        if single_force==1:
+            return G,Ess,Eds,Nss,Nds,Zss,Zds,Ezf,Nzf,Zzf
+        else:
+            return G,Ess,Eds,Nss,Nds,Zss,Zds
     
     if gftype.lower()=='tsun':
         if first_window==True: #Read in GFs from file
@@ -1064,7 +1064,7 @@ def get_data_weights(home,project_name,GF_list,d,decimate):
     
 #=================        Write inversion results      =========================
     
-def write_model(home,project_name,run_name,fault_name,model_name,rupture_speed,num_windows,epicenter,sol,num,onset_file=None):
+def write_model(home,project_name,run_name,fault_name,model_name,rupture_speed,num_windows,epicenter,sol,num,onset_file=None,single_force=0):
     '''
     Write inversion results to .inv file
     
@@ -1092,16 +1092,21 @@ def write_model(home,project_name,run_name,fault_name,model_name,rupture_speed,n
     trise=f[0,7]
     #Open structure file
     mod=loadtxt(home+project_name+'/structure/'+model_name,ndmin=2)
-    
+    if single_force==1:
+        idx=3
+    else:
+        idx=3
     # are there forced onset times?
     if onset_file is not None:
         tdelay_constant = genfromtxt(home+project_name+'/data/model_info/'+onset_file)
     
     #Get slip quantities
-    iss=2*arange(len(f)*num_windows)
-    ids=2*arange(len(f)*num_windows)+1
+    iss=idx*arange(len(f)*num_windows)
+    ids=idx*arange(len(f)*num_windows)+1
+    izf=idx*arange(len(f)*num_windows)+2
     ss=sol[iss]
     ds=sol[ids]
+    zf=sol[izf]
     #Get rigidities
     mu=zeros(len(ds))
     trup=zeros(len(ds))
@@ -1120,15 +1125,25 @@ def write_model(home,project_name,run_name,fault_name,model_name,rupture_speed,n
     #Prepare for output
     out1=f[:,0:8]
     out2=f[:,8:10]
+    print(out1,out2)
     for k in range(num_windows-1):
         out1=r_[out1,f[:,0:8]]
         out2=r_[out2,f[:,8:10]]
-    out=c_[out1,ss,ds,out2,trup,mu]
+    if single_force==1:
+        out=c_[out1,ss,ds,zf,trup]
+    else:
+        out=c_[out1,ss,ds,out2,trup,mu]
     outdir=home+project_name+'/output/inverse_models/models/'+run_name+'.'+str(num).rjust(4,'0')+'.inv'
     #CHANGE this to rupture definition as #No  x            y        z(km)      str     dip      rake       rise    dura     slip    ss_len  ds_len rupt_time
-    fmtout='%6i\t%.4f\t%.4f\t%8.4f\t%.2f\t%.2f\t%.2f\t%.2f\t%12.4e\t%12.4e\t%10.1f\t%10.1f\t%8.4f\t%.4e'
+    if single_force==1:
+        fmtout='%6i\t%.4f\t%.4f\t%8.4f\t%.2f\t%.2f\t%.2f\t%.2f\t%12.4e\t%12.4e\t%12.4e\t%8.4f'
+    else:
+        fmtout='%6i\t%.4f\t%.4f\t%8.4f\t%.2f\t%.2f\t%.2f\t%.2f\t%12.4e\t%12.4e\t%10.1f\t%10.1f\t%8.4f\t%.4e'
     print('... writing model results to file '+outdir)
-    savetxt(outdir,out,fmtout,header='No,lon,lat,z(km),strike,dip,rise,dura,ss-slip(m),ds-slip(m),ss_len(m),ds_len(m),rupt_time(s),rigidity(Pa)')
+    if single_force==1:
+        savetxt(outdir,out,fmtout,header='No,lon,lat,z(km),strike,dip,rise,duration,north_force,east_force,vertical_force,rupt_time(s)')
+    else:
+        savetxt(outdir,out,fmtout,header='No,lon,lat,z(km),strike,dip,rise,dura,ss-slip(m),ds-slip(m),ss_len(m),ds_len(m),rupt_time(s),rigidity(Pa)')
         
 def write_synthetics_GOD(home,project_name,run_name,GF_list,ds,num,decimate):
     '''
