@@ -1125,7 +1125,6 @@ def write_model(home,project_name,run_name,fault_name,model_name,rupture_speed,n
     #Prepare for output
     out1=f[:,0:8]
     out2=f[:,8:10]
-    print(out1,out2)
     for k in range(num_windows-1):
         out1=r_[out1,f[:,0:8]]
         out2=r_[out2,f[:,8:10]]
