@@ -2779,7 +2779,7 @@ def lowpass(data,fcorner,fsample,order,zerophase=True,cascading=True):
     '''
     from scipy.signal import butter,filtfilt,lfilter,sosfiltfilt,sosfilt
     from numpy import size,array
-    
+
     if size(fcorner)==2:
         ftype='bandpass'
     else:
@@ -2810,7 +2810,6 @@ def highpass(data,fcorner,fsample,order,zerophase=True,cascading=True):
     from numpy import size,array
     
     fnyquist=fsample/2
-    
     if cascading==True:
         sos = butter(order, array(fcorner)/(fnyquist),'highpass',output='sos')
         if zerophase==True:
@@ -2832,11 +2831,9 @@ def bandstop(data,fcorner,fsample,order,zerophase=True,cascading=True):
     Make a lowpass zero phase filter
     '''
     from scipy.signal import butter,filtfilt,lfilter,sosfiltfilt,sosfilt
-    from numpy import array
-    
+    from numpy import size,array
 
     fnyquist=fsample/2
-    
     if cascading==True:
         sos = butter(order, array(fcorner)/(fnyquist),'bandstop',output='sos')
         if zerophase==True:

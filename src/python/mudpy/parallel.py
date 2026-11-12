@@ -297,46 +297,46 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     if custom_stf==None:
                         if single_force==True:
                             #North Force
-                            commandSS="syn -I -M"+str(Mag)+"/"+str(strikeSS)+"/"+str(dip)+" -D"+str(duration)+ \
+                            commandSS="syn -M"+str(Mag)+"/"+str(strikeSS)+"/"+str(dip)+" -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.disp.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS) #Split string into lexical components for system call
                             #East Force
-                            commandDS="syn -I -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -D"+str(duration)+ \
+                            commandDS="syn -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.disp.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
                             #Vertical force
-                            commandZF="syn -I -M"+str(Mag)+"/0/-90 -D"+str(duration)+ \
+                            commandZF="syn -M"+str(Mag)+"/0/-90 -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".ZF.disp.x -G"+green_path+diststr+".grn.0"
                             commandZF=split(commandZF) #Split string into lexical components for system call
 
                         else:
-                            commandSS="syn -I -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeSS)+" -D"+str(duration)+ \
+                            commandSS="syn -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeSS)+" -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.disp.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS) #Split string into lexical components for system call
                             #Now dip slip
-                            commandDS="syn -I -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeDS)+" -D"+str(duration)+ \
+                            commandDS="syn -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeDS)+" -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.disp.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
                     else:
                         if single_force==True:
                             #North Force
-                            commandSS="syn -I -M"+str(Mag)+"/"+str(strikess)+"/"+str(dip)+" -S"+custom_stf+ \
+                            commandSS="syn -M"+str(Mag)+"/"+str(strikess)+"/"+str(dip)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.disp.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS) #Split string into lexical components for system call
                             #East Force
-                            commandDS="syn -I -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -S"+custom_stf+ \
+                            commandDS="syn -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.disp.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
                             #Vertical Force
-                            commandZF="syn -I -M"+str(Mag)+"/0/-90 -S"+custom_stf+ \
+                            commandZF="syn -M"+str(Mag)+"/0/-90 -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".ZF.disp.x -G"+green_path+diststr+".grn.0"
                             commandZF=split(commandZF)
                         else:
-                            commandSS="syn -I -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeSS)+" -S"+custom_stf+ \
+                            commandSS="syn -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeSS)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.disp.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS) #Split string into lexical components for system call
                             #Now dip slip
-                            commandDS="syn -I -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeDS)+" -S"+custom_stf+ \
+                            commandDS="syn -M"+str(Mw)+"/"+str(strike)+"/"+str(dip)+"/"+str(rakeDS)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.disp.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
                 else: #Make vel.
@@ -344,15 +344,15 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     if custom_stf==None:
                         if single_force==True:
                             #North Force
-                            commandSS="syn -M"+str(Mag)+"/"+str(strikeSS)+"/"+str(dip)+" -D"+str(duration)+ \
+                            commandSS="syn -J -M"+str(Mag)+"/"+str(strikeSS)+"/"+str(dip)+" -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.vel.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS)
                             #East Force
-                            commandDS="syn -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -D"+str(duration)+ \
+                            commandDS="syn -J -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.vel.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
                             #Vertical Force
-                            commandZF="syn -M"+str(Mag)+"/0/-90 -D"+str(duration)+ \
+                            commandZF="syn -J -M"+str(Mag)+"/0/-90 -D"+str(duration)+ \
                                 "/"+str(rise)+" -A"+str(az[k])+"- O"+staname[k]+".subfault"+num+".ZF.vel.x -G"+green_path+diststr+".grn.0"
                             commandZF=split(commandZF)
                         else:
@@ -366,15 +366,15 @@ def run_parallel_synthetics(home,project_name,station_file,model_name,integrate,
                     else:
                         if single_force==True:    
                             #North Force
-                            commandSS="syn -M"+str(Mag)+"/"+str(strikeSS)+"/"+str(dip)+" -S"+custom_stf+ \
+                            commandSS="syn -J -M"+str(Mag)+"/"+str(strikeSS)+"/"+str(dip)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".SS.vel.x -G"+green_path+diststr+".grn.0"
                             commandSS=split(commandSS)
                             #East Force
-                            commandDS="syn -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -S"+custom_stf+ \
+                            commandDS="syn -J -M"+str(Mag)+"/"+str(strikeDS)+"/"+str(dip)+" -S"+custom_stf+ \
                                 " -A"+str(az[k])+" -O"+staname[k]+".subfault"+num+".DS.vel.x -G"+green_path+diststr+".grn.0"
                             commandDS=split(commandDS)
                             #Vertical Force
-                            commandZF="syn -M"+str(Mag)+"/0/-90 -S"+custom_stf+ \
+                            commandZF="syn -J -M"+str(Mag)+"/0/-90 -S"+custom_stf+ \
                                 "-A"+str(az[k])+" -O"+statname[k]+".subfault"+num+".ZF.vel.x -G"+green_path+diststr+".grn.0"
                             commandZF=split(commandZF)
                         else:

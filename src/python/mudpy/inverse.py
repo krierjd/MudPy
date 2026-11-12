@@ -127,7 +127,7 @@ def getG(home,project_name,fault_name,model_name,GF_list,G_from_file,G_name,epic
                         Gdisp=Gdisp_temp
                     else:
                         first_window=False
-                        Gdisp_temp,Ess,Eds,Nss,Nds,Zss,Zds = makeG(home,project_name,fault_name,model_name,split(mini_station)[1],
+                        Gdisp_temp,Ess,Eds,Nss,Nds,Zss,Zds,Ezf,Nzf,Zzf = makeG(home,project_name,fault_name,model_name,split(mini_station)[1],
                                                                 gftype,tsunami,tdelay,decimate,bandpass,first_window,Ess,Eds,Nss,Nds,Zss,Zds,Ezf,Nzf,Zzf,single_force=single_force)
                         Gdisp=c_[Gdisp,Gdisp_temp]
                 remove(mini_station) #Cleanup 
@@ -279,6 +279,10 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
     #Load fault model
     source=loadtxt(home+project_name+'/data/model_info/'+fault_name,ndmin=2)
     Nfaults=source.shape[0] #Number of subfaults
+    if source[0][3] < 0.5:
+        zero_phase = False
+    else:
+        zero_phase = True
     #Load station info
     station_file=home+project_name+'/data/station_info/'+station_file
     staname=genfromtxt(station_file,dtype="U",usecols=0)
@@ -465,16 +469,16 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                         if len(BP)>1 and BP[1]==inf: #A high pass filter has been requested
                             if kfault==0:
                                 print('.... highpass')
-                            Ess[ktrace].data=hfilt(Ess[ktrace].data,BP[0],fsample,2)
-                            Nss[ktrace].data=hfilt(Nss[ktrace].data,BP[0],fsample,2)
-                            Zss[ktrace].data=hfilt(Zss[ktrace].data,BP[0],fsample,2)
-                            Eds[ktrace].data=hfilt(Eds[ktrace].data,BP[0],fsample,2)
-                            Nds[ktrace].data=hfilt(Nds[ktrace].data,BP[0],fsample,2)
-                            Zds[ktrace].data=hfilt(Zds[ktrace].data,BP[0],fsample,2)
+                            Ess[ktrace].data=hfilt(Ess[ktrace].data,BP[0],fsample,2,zerophase=zero_phase)
+                            Nss[ktrace].data=hfilt(Nss[ktrace].data,BP[0],fsample,2,zerophase=zero_phase)
+                            Zss[ktrace].data=hfilt(Zss[ktrace].data,BP[0],fsample,2,zerophase=zero_phase)
+                            Eds[ktrace].data=hfilt(Eds[ktrace].data,BP[0],fsample,2,zerophase=zero_phase)
+                            Nds[ktrace].data=hfilt(Nds[ktrace].data,BP[0],fsample,2,zerophase=zero_phase)
+                            Zds[ktrace].data=hfilt(Zds[ktrace].data,BP[0],fsample,2,zerophase=zero_phase)
                             if single_force==1:
-                                Ezf[ktrace].data=hfilt(Ezf[ktrace].data,BP[0],fsample,2)
-                                Nzf[ktrace].data=hfilt(Nzf[ktrace].data,BP[0],fsample,2)
-                                Zzf[ktrace].data=hfilt(Zzf[ktrace].data,BP[0],fsample,2)
+                                Ezf[ktrace].data=hfilt(Ezf[ktrace].data,BP[0],fsample,2,zerophase=zero_phase)
+                                Nzf[ktrace].data=hfilt(Nzf[ktrace].data,BP[0],fsample,2,zerophase=zero_phase)
+                                Zzf[ktrace].data=hfilt(Zzf[ktrace].data,BP[0],fsample,2,zerophase=zero_phase)
                         else: #A low pass or bandpass filter has been requested
                             if kfault==0:
                                 print('.... lowpass')
@@ -484,16 +488,16 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
                             #Eds[ktrace].data=lfilt(Eds[ktrace].data,BP[0],fsample,2)
                             #Nds[ktrace].data=lfilt(Nds[ktrace].data,BP[0],fsample,2)
                             #Zds[ktrace].data=lfilt(Zds[ktrace].data,BP[0],fsample,2)
-                            Ess[ktrace].data=lfilt(Ess[ktrace].data,BP,fsample,2)
-                            Nss[ktrace].data=lfilt(Nss[ktrace].data,BP,fsample,2)
-                            Zss[ktrace].data=lfilt(Zss[ktrace].data,BP,fsample,2)
-                            Eds[ktrace].data=lfilt(Eds[ktrace].data,BP,fsample,2)
-                            Nds[ktrace].data=lfilt(Nds[ktrace].data,BP,fsample,2)
-                            Zds[ktrace].data=lfilt(Zds[ktrace].data,BP,fsample,2)
+                            Ess[ktrace].data=lfilt(Ess[ktrace].data,BP,fsample,2,zerophase=zero_phase)
+                            Nss[ktrace].data=lfilt(Nss[ktrace].data,BP,fsample,2,zerophase=zero_phase)
+                            Zss[ktrace].data=lfilt(Zss[ktrace].data,BP,fsample,2,zerophase=zero_phase)
+                            Eds[ktrace].data=lfilt(Eds[ktrace].data,BP,fsample,2,zerophase=zero_phase)
+                            Nds[ktrace].data=lfilt(Nds[ktrace].data,BP,fsample,2,zerophase=zero_phase)
+                            Zds[ktrace].data=lfilt(Zds[ktrace].data,BP,fsample,2,zerophase=zero_phase)
                             if single_force==1:
-                                Ezf[ktrace].data=lfilt(Ezf[ktrace].data,BP,fsample,2)
-                                Nzf[ktrace].data=lfilt(Nzf[ktrace].data,BP,fsample,2)
-                                Zzf[ktrace].data=lfilt(Zzf[ktrace].data,BP,fsample,2)
+                                Ezf[ktrace].data=lfilt(Ezf[ktrace].data,BP,fsample,2,zerophase=zero_phase)
+                                Nzf[ktrace].data=lfilt(Nzf[ktrace].data,BP,fsample,2,zerophase=zero_phase)
+                                Zzf[ktrace].data=lfilt(Zzf[ktrace].data,BP,fsample,2,zerophase=zero_phase)
                         #bandpass=None
                     
                     ### HAAAAAACCCCKKKK!!!!
@@ -631,6 +635,7 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
             G[insert_position:insert_position+3*npts,:]=Gtemp
             insert_position+=3*npts #Update for next station
         if single_force==1:
+            print(".... Working with non-coupled source ....")
             return G,Ess,Eds,Nss,Nds,Zss,Zds,Ezf,Nzf,Zzf
         else:
             return G,Ess,Eds,Nss,Nds,Zss,Zds
@@ -724,7 +729,7 @@ def makeG(home,project_name,fault_name,model_name,station_file,gftype,tsunami,td
         pass                                
       
       
-def getdata(home,project_name,GF_list,decimate,bandpass,quiet=False):
+def getdata(home,project_name,GF_list,decimate,bandpass,quiet=False,single_force=0):
     '''
     Assemble the data vector for all data types
     
@@ -754,6 +759,10 @@ def getdata(home,project_name,GF_list,decimate,bandpass,quiet=False):
     displacement_bandpass=bandpass[0]
     velocity_bandpass=bandpass[1]
     tsunami_bandpass=bandpass[2]
+
+    #Using a falsezerophase if doing single force inversion
+    if single_force==1:
+        zero_phase=False
     
     #Read one column at a time
     kgf=0 #Static field
@@ -793,9 +802,9 @@ def getdata(home,project_name,GF_list,decimate,bandpass,quiet=False):
             ####################################################
             
             fsample=1./n[0].stats.delta
-            n[0].data=lfilt(n[0].data,displacement_bandpass,fsample,2)
-            e[0].data=lfilt(e[0].data,displacement_bandpass,fsample,2)
-            u[0].data=lfilt(u[0].data,displacement_bandpass,fsample,2)
+            n[0].data=lfilt(n[0].data,displacement_bandpass,fsample,2, zerophase=zero_phase)
+            e[0].data=lfilt(e[0].data,displacement_bandpass,fsample,2, zerophase=zero_phase)
+            u[0].data=lfilt(u[0].data,displacement_bandpass,fsample,2, zerophase=zero_phase)
         #Decimate
         if decimate!=None:
             n[0]=stdecimate(n[0],decimate)
@@ -898,16 +907,21 @@ def getLs(home,project_name,fault_name,nfaults,num_windows,bounds,single_force=0
     #Initalize
     if single_force==1:
         L=zeros((3*N,3*N))
+        idx=3
     else:
         L=zeros((2*N,2*N))
+        idx=2
     #Which L am I building?
     print('Making discrete Laplace operator regularization matrix...')
     for kfault in range(N):#Loop over faults and fill regularization matrix
         stencil,values=laplace_stencil(kfault,nstrike,ndip,bounds)
-        #Add strike slip branches of stencil
-        L[2*kfault,2*stencil]=values
-        #Add dip slip branches of stencil
-        L[2*kfault+1,2*stencil+1]=values
+        #Add strike slip / north branches of stencil
+        L[idx*kfault,idx*stencil]=values
+        #Add dip slip / east branches of stencil
+        L[idx*kfault+1,idx*stencil+1]=values
+        if single_force==1:
+            #Add vertical force branch of stencil
+            L[idx*kfault+2,idx*stencil+2]=values
     if num_windows==1: #Only one rupture speed
         Lout=L 
     else: #Multiple rupture speeds, smooth total moment laplacian
@@ -1130,9 +1144,10 @@ def write_model(home,project_name,run_name,fault_name,model_name,rupture_speed,n
         out2=r_[out2,f[:,8:10]]
     if single_force==1:
         out=c_[out1,ss,ds,zf,trup]
+        outdir=home+project_name+'/output/inverse_models/models/'+run_name+'.'+str(num).rjust(4,'0')+'.lspy'
     else:
         out=c_[out1,ss,ds,out2,trup,mu]
-    outdir=home+project_name+'/output/inverse_models/models/'+run_name+'.'+str(num).rjust(4,'0')+'.inv'
+        outdir=home+project_name+'/output/inverse_models/models/'+run_name+'.'+str(num).rjust(4,'0')+'.inv'
     #CHANGE this to rupture definition as #No  x            y        z(km)      str     dip      rake       rise    dura     slip    ss_len  ds_len rupt_time
     if single_force==1:
         fmtout='%6i\t%.4f\t%.4f\t%8.4f\t%.2f\t%.2f\t%.2f\t%.2f\t%12.4e\t%12.4e\t%12.4e\t%8.4f'

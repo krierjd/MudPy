@@ -673,7 +673,7 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
     t1=datetime.now()
     #Get data vector
     if data_vector==None:
-        d=inv.getdata(home,project_name,GF_list,decimate,bandpass=bandpass)
+        d=inv.getdata(home,project_name,GF_list,decimate,bandpass=bandpass,single_force=single_force)
     else:
         d=load(data_vector) 
     #Get GFs
@@ -931,10 +931,8 @@ def run_inversion(home,project_name,run_name,fault_name,model_name,GF_list,G_fro
             #Compute synthetics
             ds=dot(G,sol)
             
-####################testprintJK
-            #print(sol)
-            #Get stats
-            L2,Lmodel=inv.get_stats(Kinv,sol,x,Ls)
+            L2,Lmodel=inv.get_stats(WG,sol,wd,Ls)
+            #L2,Lmodel=inv.get_stats(Kinv,sol,x,Ls) #what it was before change JK 8/21/2026
             VR,L2data=inv.get_VR(home,project_name,GF_list,sol,d,ds,decimate,WG,wd)
             #VR=inv.get_VR(WG,sol,wd)
             #ABIC=inv.get_ABIC(WG,K,sol,wd,lambda_spatial,lambda_temporal,Ls,LsLs,Lt,LtLt)
